@@ -1,56 +1,46 @@
-# NatsX
+﻿# NatsX
 
-[English](README.md) | [简体中文](README.zh.md)
+[English](README.md) | [绠€浣撲腑鏂嘳(README.zh.md)
 
-NatsX 是一个面向 `NATS / JetStream` 的桌面客户端，基于 `Go + Wails + React + Ant Design` 构建，聚焦连接管理、订阅、消息发送、`Request / Reply` 调试、JetStream 工作流与本地持久化。
+NatsX 鏄竴涓潰鍚?`NATS / JetStream` 鐨勬闈㈠鎴风锛屽熀浜?`Go + Wails + React + Ant Design` 鏋勫缓锛岃仛鐒﹁繛鎺ョ鐞嗐€佽闃呫€佹秷鎭彂閫併€乣Request / Reply` 璋冭瘯銆丣etStream 宸ヤ綔娴佷笌鏈湴鎸佷箙鍖栥€?
+- 鐗堟湰锛歚1.0.3`
+- 浣滆€咃細`punk-one`
+- 浠撳簱鍦板潃锛歔https://github.com/punk-one/NatsX](https://github.com/punk-one/NatsX)
+- Releases锛歔https://github.com/punk-one/NatsX/releases](https://github.com/punk-one/NatsX/releases)
+- 璁稿彲璇侊細`Apache License 2.0`
 
-- 版本：`1.0.2`
-- 作者：`punk-one`
-- 仓库地址：[https://github.com/punk-one/NatsX](https://github.com/punk-one/NatsX)
-- Releases：[https://github.com/punk-one/NatsX/releases](https://github.com/punk-one/NatsX/releases)
-- 许可证：`Apache License 2.0`
-
-## 预览
+## 棰勮
 
 ![NatsX Screenshot](docs/screenshot.png)
 
-## 功能特性
+## 鍔熻兘鐗规€?
+### 杩炴帴绠＄悊
 
-### 连接管理
+- 鏀寔杩炴帴鐨勬柊寤恒€佺紪杈戙€佸垹闄ゃ€佸垎缁勩€佸鍏ヤ笌瀵煎嚭
+- 鏀寔 `No Auth`銆乣Username / Password`銆乣Token`銆乣TLS / mTLS`銆乣NKey` 涓?`Credentials`
+- 鏀寔澶嶇敤宸蹭笂浼犵殑璇佷功銆佺閽ャ€丆A 涓庡嚟鎹枃浠?- 鍚姩鏃惰嚜鍔ㄦ仮澶嶅凡淇濆瓨鐨勮繛鎺ヤ笌搴旂敤璁剧疆
 
-- 支持连接的新建、编辑、删除、分组、导入与导出
-- 支持 `No Auth`、`Username / Password`、`Token`、`TLS / mTLS`、`NKey` 与 `Credentials`
-- 支持复用已上传的证书、私钥、CA 与凭据文件
-- 启动时自动恢复已保存的连接与应用设置
-
-### 消息工作流
-
-- 订阅 Subject 并实时查看消息流
-- 支持带 Headers 的消息发送与载荷格式化
-- 支持 `JSON`、`Text`、`Hex`、`Base64`、`CBOR`、`MsgPack` 等载荷视图
-- 保存最近发送记录，便于快速重放与复用
+### 娑堟伅宸ヤ綔娴?
+- 璁㈤槄 Subject 骞跺疄鏃舵煡鐪嬫秷鎭祦
+- 鏀寔甯?Headers 鐨勬秷鎭彂閫佷笌杞借嵎鏍煎紡鍖?- 鏀寔 `JSON`銆乣Text`銆乣Hex`銆乣Base64`銆乣CBOR`銆乣MsgPack` 绛夎浇鑽疯鍥?- 淇濆瓨鏈€杩戝彂閫佽褰曪紝渚夸簬蹇€熼噸鏀句笌澶嶇敤
 
 ### Request / Reply
 
-- 支持带超时控制的请求发送
-- 并排对比原始请求、重放请求与响应结果
-- 跟踪请求 ID、耗时与关联消息
-
+- 鏀寔甯﹁秴鏃舵帶鍒剁殑璇锋眰鍙戦€?- 骞舵帓瀵规瘮鍘熷璇锋眰銆侀噸鏀捐姹備笌鍝嶅簲缁撴灉
+- 璺熻釜璇锋眰 ID銆佽€楁椂涓庡叧鑱旀秷鎭?
 ### JetStream
 
-- 浏览 Streams 与 Consumers
-- 新建、更新、删除 Stream / Consumer 配置
-- 从 Pull Consumer 主动抓取消息
-- 在桌面界面中执行 `Ack`、`Nak`、`Term`
+- 娴忚 Streams 涓?Consumers
+- 鏂板缓銆佹洿鏂般€佸垹闄?Stream / Consumer 閰嶇疆
+- 浠?Pull Consumer 涓诲姩鎶撳彇娑堟伅
+- 鍦ㄦ闈㈢晫闈腑鎵ц `Ack`銆乣Nak`銆乣Term`
 
-### 持久化与发布
+### 鎸佷箙鍖栦笌鍙戝竷
 
-- 将设置、连接、升级状态与日志统一保存到 `database/natsx.db`
-- 将上传的 credentials 与 TLS 相关资源保存到应用本地目录
-- 支持基于 GitHub Releases 的更新检查与手动升级
-- 同时发布 `windows-amd64` 与 `linux-amd64` 两个平台便携包
-
-## 构建
+- 灏嗚缃€佽繛鎺ャ€佸崌绾х姸鎬佷笌鏃ュ織缁熶竴淇濆瓨鍒?`database/natsx.db`
+- 灏嗕笂浼犵殑 credentials 涓?TLS 鐩稿叧璧勬簮淇濆瓨鍒板簲鐢ㄦ湰鍦扮洰褰?- 鏀寔鍩轰簬 GitHub Releases 鐨勬洿鏂版鏌ヤ笌鎵嬪姩鍗囩骇
+- 鍚屾椂鍙戝竷 `windows-amd64` 涓?`linux-amd64` 涓や釜骞冲彴渚挎惡鍖?
+## 鏋勫缓
 
 ### Windows
 
@@ -64,15 +54,14 @@ go run github.com/wailsapp/wails/v2/cmd/wails@v2.9.3 build -nosyncgomod -m
 go run github.com/wailsapp/wails/v2/cmd/wails@v2.9.3 build -nosyncgomod -m -platform linux/amd64 -nopackage -tags webkit2_41 -o NatsX
 ```
 
-## `v1.0.2` 发布资产
+## `v1.0.3` 鍙戝竷璧勪骇
 
-- `NatsX-1.0.2-windows-amd64.zip`
-- `NatsX-1.0.2-windows-amd64.sha256.txt`
-- `NatsX-1.0.2-linux-amd64.tar.gz`
-- `NatsX-1.0.2-linux-amd64.sha256.txt`
+- `NatsX-1.0.3-windows-amd64.zip`
+- `NatsX-1.0.3-windows-amd64.sha256.txt`
+- `NatsX-1.0.3-linux-amd64.tar.gz`
+- `NatsX-1.0.3-linux-amd64.sha256.txt`
 - `SHA256SUMS`
 - `latest.json`
 
-## 许可证
-
-项目基于 `Apache License 2.0` 发布，详见 `LICENSE`。
+## 璁稿彲璇?
+椤圭洰鍩轰簬 `Apache License 2.0` 鍙戝竷锛岃瑙?`LICENSE`銆?

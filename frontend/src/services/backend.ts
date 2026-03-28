@@ -116,15 +116,15 @@ const defaultAppSettings: AppSettings = {
   logRetention: { ...defaultLogRetentionSettings },
 }
 const mockUpdateInfo: UpdateInfo = {
-  currentVersion: '1.0.2',
-  latestVersion: '1.0.3',
+  currentVersion: '1.0.3',
+  latestVersion: '1.0.4',
   releaseFound: true,
   hasUpdate: true,
   hasPlatformAsset: true,
   platform: 'windows-amd64',
-  releaseUrl: 'https://github.com/punk-one/NatsX/releases/tag/v1.0.3',
-  downloadUrl: 'https://github.com/punk-one/NatsX/releases/download/v1.0.3/NatsX-1.0.3-windows-amd64.zip',
-  assetName: 'NatsX-1.0.3-windows-amd64.zip',
+  releaseUrl: 'https://github.com/punk-one/NatsX/releases/tag/v1.0.4',
+  downloadUrl: 'https://github.com/punk-one/NatsX/releases/download/v1.0.4/NatsX-1.0.4-windows-amd64.zip',
+  assetName: 'NatsX-1.0.4-windows-amd64.zip',
   publishedAt: createTimestamp(),
   releaseNotes: 'Mock release notes for update preview.',
 }
@@ -1075,7 +1075,7 @@ async function mockCall<T>(method: MethodName, args: unknown[]): Promise<T> {
     case 'DownloadUpdatePackage': {
       mockDownloadedUpdate = {
         path: `C:\\Users\\Public\\Downloads\\${mockUpdateInfo.assetName}`,
-        assetName: mockUpdateInfo.assetName || 'NatsX-1.0.2-windows-amd64-setup.exe',
+        assetName: mockUpdateInfo.assetName || 'NatsX-1.0.4-windows-amd64.zip',
         latestVersion: mockUpdateInfo.latestVersion,
         releaseUrl: mockUpdateInfo.releaseUrl,
         downloadUrl: mockUpdateInfo.downloadUrl,
@@ -1245,5 +1245,6 @@ export const backend = {
   windowToggleMaximise: () => invoke<WindowState>('WindowToggleMaximise'),
   windowClose: () => invoke<void>('WindowClose'),
 }
+
 
 

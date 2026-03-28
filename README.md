@@ -1,10 +1,10 @@
-# NatsX
+﻿# NatsX
 
-[English](README.md) | [简体中文](README.zh.md)
+[English](README.md) | [绠€浣撲腑鏂嘳(README.zh.md)
 
 NatsX is a desktop client for `NATS / JetStream`, built with `Go + Wails + React + Ant Design`. It focuses on connection management, subscriptions, publishing, `Request / Reply` debugging, JetStream workflows, and reliable local persistence.
 
-- Version: `1.0.2`
+- Version: `1.0.3`
 - Author: `punk-one`
 - Repository: [https://github.com/punk-one/NatsX](https://github.com/punk-one/NatsX)
 - Releases: [https://github.com/punk-one/NatsX/releases](https://github.com/punk-one/NatsX/releases)
@@ -66,15 +66,16 @@ go run github.com/wailsapp/wails/v2/cmd/wails@v2.9.3 build -nosyncgomod -m -plat
 
 ## Release Assets
 
-For `v1.0.2`, the GitHub Release includes:
+For `v1.0.3`, the GitHub Release includes:
 
-- `NatsX-1.0.2-windows-amd64.zip`
-- `NatsX-1.0.2-windows-amd64.sha256.txt`
-- `NatsX-1.0.2-linux-amd64.tar.gz`
-- `NatsX-1.0.2-linux-amd64.sha256.txt`
+- `NatsX-1.0.3-windows-amd64.zip`
+- `NatsX-1.0.3-windows-amd64.sha256.txt`
+- `NatsX-1.0.3-linux-amd64.tar.gz`
+- `NatsX-1.0.3-linux-amd64.sha256.txt`
 - `SHA256SUMS`
 - `latest.json`
 
 ## License
 
 Licensed under the `Apache License 2.0`. See `LICENSE` for details.
+

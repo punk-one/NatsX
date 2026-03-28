@@ -2,7 +2,7 @@
 
 ## Goal
 
-This document defines the recommended screenshots for the `1.0.2` release.
+This document defines the recommended screenshots for the `1.0.3` release.
 
 The aim is to produce a consistent set of images for:
 
@@ -230,5 +230,6 @@ Before using screenshots publicly, confirm:
 - all text is readable
 - no sensitive data is visible
 - selected states are obvious
-- the UI matches the current `1.0.2` build
+- the UI matches the current `1.0.3` build
+
 

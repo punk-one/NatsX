@@ -1,4 +1,4 @@
-package main
+﻿package main
 
 import (
 	"context"
@@ -26,7 +26,7 @@ type App struct {
 	dbStore *storage.SQLiteStore
 }
 
-const currentAppVersion = "1.0.2"
+const currentAppVersion = "1.0.3"
 
 type WindowState struct {
 	Maximised  bool `json:"maximised"`
@@ -332,12 +332,12 @@ func (a *App) OpenDownloadedUpdate(path string) error {
 		selection, err := wailsruntime.MessageDialog(a.ctx, wailsruntime.MessageDialogOptions{
 			Type:          wailsruntime.QuestionDialog,
 			Title:         "Installer Started",
-			Message:       "安装包已启动。是否现在退出当前应用，以便继续升级？",
-			Buttons:       []string{"稍后", "立即退出"},
-			DefaultButton: "立即退出",
-			CancelButton:  "稍后",
+			Message:       "The update package has been opened. Quit NatsX now to continue the upgrade?",
+			Buttons:       []string{"Later", "Quit Now"},
+			DefaultButton: "Quit Now",
+			CancelButton:  "Later",
 		})
-		if err == nil && selection == "立即退出" {
+		if err == nil && selection == "Quit Now" {
 			wailsruntime.Quit(a.ctx)
 		}
 	}
@@ -584,3 +584,4 @@ func defaultExportFilename(masked bool) string {
 	}
 	return fmt.Sprintf("%s-%s.json", name, timestamp)
 }
+

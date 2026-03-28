@@ -2,6 +2,18 @@
 
 All notable changes to `NatsX` will be documented in this file.
 
+## [1.0.3] - 2026-03-28
+
+### Fixed
+
+- Fixed `latest.json` loading on Windows by preferring the GitHub Releases API asset endpoint before the browser download URL
+- Fixed structured release metadata application so published notes and timestamps can come from `latest.json`
+
+### Changed
+
+- Refreshed release packages and release notes for the `1.0.3` hotfix release
+- Kept cross-platform release outputs for both `windows-amd64` and `linux-amd64`
+
 ## [1.0.2] - 2026-03-28
 
 ### Added

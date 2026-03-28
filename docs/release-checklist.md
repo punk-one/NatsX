@@ -3,8 +3,8 @@
 ## Target Release
 
 - Product: `NatsX`
-- Version: `1.0.2`
-- Tag: `v1.0.2`
+- Version: `1.0.3`
+- Tag: `v1.0.3`
 - Release date: `2026-03-23`
 - Author: `punk-one`
 - License: `Apache License 2.0`
@@ -80,17 +80,17 @@ go test ./...
 
 Default outputs:
 
-- `release/NatsX-1.0.2-windows-amd64/`
-- `release/NatsX-1.0.2-windows-amd64.zip`
-- `release/NatsX-1.0.2-windows-amd64.sha256.txt`
-- `release/NatsX-1.0.2-windows-amd64-assets.md`
-- `release/NatsX-1.0.2-windows-amd64-github-release.md`
-- `release/NatsX-1.0.2-windows-amd64/docs/release-github-bilingual.md`
-- `release/NatsX-1.0.2-windows-amd64/docs/release-publish-final.md`
+- `release/NatsX-1.0.3-windows-amd64/`
+- `release/NatsX-1.0.3-windows-amd64.zip`
+- `release/NatsX-1.0.3-windows-amd64.sha256.txt`
+- `release/NatsX-1.0.3-windows-amd64-assets.md`
+- `release/NatsX-1.0.3-windows-amd64-github-release.md`
+- `release/NatsX-1.0.3-windows-amd64/docs/release-github-bilingual.md`
+- `release/NatsX-1.0.3-windows-amd64/docs/release-publish-final.md`
 
 Optional output with `-Nsis`:
 
-- `release/NatsX-1.0.2-windows-amd64-setup.exe`
+- `release/NatsX-1.0.3-windows-amd64-setup.exe`
 
 ## Validation Checklist
 
@@ -123,7 +123,7 @@ Release only after all checks pass:
 ### Minimal zip package
 
 ```text
-NatsX-1.0.2-windows-amd64.zip
+NatsX-1.0.3-windows-amd64.zip
 - NatsX.exe
 - LICENSE
 - CHANGELOG.md
@@ -143,22 +143,22 @@ NatsX-1.0.2-windows-amd64.zip
 
 Recommended GitHub Release attachments:
 
-- `NatsX-1.0.2-windows-amd64.zip`
-- `NatsX-1.0.2-windows-amd64.sha256.txt`
+- `NatsX-1.0.3-windows-amd64.zip`
+- `NatsX-1.0.3-windows-amd64.sha256.txt`
 
 ### Optional installer package
 
 ```text
-NatsX-1.0.2-setup.exe
+NatsX-1.0.3-setup.exe
 ```
 
-This package is optional and is not required for the `1.0.2` release.
+This package is optional and is not required for the `1.0.3` release.
 
 ## Final Release Check
 
 Before publishing:
 
-- Confirm Git tag uses the format `v1.0.2`
+- Confirm Git tag uses the format `v1.0.3`
 - Confirm version in `wails.json`
 - Confirm changelog and release notes match the actual release
 - Confirm icon assets are correct
@@ -167,4 +167,5 @@ Before publishing:
 - Confirm `sha256` file matches the uploaded release assets
 
 If all items are complete, the release is ready to publish.
+
 

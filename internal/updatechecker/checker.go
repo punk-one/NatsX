@@ -36,6 +36,7 @@ type githubRelease struct {
 }
 
 type githubReleaseAsset struct {
+	APIURL             string `json:"url"`
 	Name               string `json:"name"`
 	BrowserDownloadURL string `json:"browser_download_url"`
 	ContentType        string `json:"content_type"`
@@ -135,16 +136,41 @@ func (c *Checker) Check(ctx context.Context) (domain.UpdateInfo, error) {
 
 func (c *Checker) loadReleaseManifest(ctx context.Context, release githubRelease) (releaseManifest, bool) {
 	asset := pickReleaseManifestAsset(release.Assets)
-	if asset == nil || strings.TrimSpace(asset.BrowserDownloadURL) == "" {
+	if asset == nil {
 		return releaseManifest{}, false
 	}
 
-	request, err := http.NewRequestWithContext(ctx, http.MethodGet, asset.BrowserDownloadURL, nil)
+	candidates := []struct {
+		url    string
+		accept string
+	}{
+		{url: strings.TrimSpace(asset.APIURL), accept: "application/octet-stream"},
+		{url: strings.TrimSpace(asset.BrowserDownloadURL), accept: "application/json"},
+	}
+
+	for _, candidate := range candidates {
+		if candidate.url == "" {
+			continue
+		}
+		manifest, ok := c.fetchReleaseManifest(ctx, candidate.url, candidate.accept, release.TagName)
+		if ok {
+			return manifest, true
+		}
+	}
+
+	return releaseManifest{}, false
+}
+
+func (c *Checker) fetchReleaseManifest(ctx context.Context, sourceURL string, accept string, releaseTag string) (releaseManifest, bool) {
+	request, err := http.NewRequestWithContext(ctx, http.MethodGet, sourceURL, nil)
 	if err != nil {
 		return releaseManifest{}, false
 	}
-	request.Header.Set("Accept", "application/json")
+	if strings.TrimSpace(accept) != "" {
+		request.Header.Set("Accept", accept)
+	}
 	request.Header.Set("User-Agent", "NatsX-UpdateChecker")
+	request.Header.Set("X-GitHub-Api-Version", "2022-11-28")
 
 	response, err := c.client.Do(request)
 	if err != nil {
@@ -162,7 +188,7 @@ func (c *Checker) loadReleaseManifest(ctx context.Context, release githubRelease
 	}
 
 	manifestVersion := normalizeVersion(firstNonEmpty(manifest.Version, manifest.Tag))
-	releaseVersion := normalizeVersion(release.TagName)
+	releaseVersion := normalizeVersion(releaseTag)
 	if manifestVersion != "" && releaseVersion != "" && manifestVersion != releaseVersion {
 		return releaseManifest{}, false
 	}

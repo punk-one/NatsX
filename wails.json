@@ -13,8 +13,9 @@
   "info": {
     "companyName": "punk-one",
     "productName": "NatsX",
-    "productVersion": "1.0.2",
+    "productVersion": "1.0.3",
     "comments": "Desktop client for NATS",
     "copyright": "Copyright (c) 2026 punk-one"
   }
 }
+

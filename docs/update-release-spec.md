@@ -1,4 +1,4 @@
-# Update Release Specification
+﻿# Update Release Specification
 
 This document defines the minimum publishing rules that keep the built-in update check working correctly for `NatsX`.
 
@@ -11,8 +11,8 @@ This document defines the minimum publishing rules that keep the built-in update
 
 ## Tag and Version Rules
 
-- Use semantic version tags such as `v1.0.2`
-- Keep the release title aligned with the tag, for example `NatsX v1.0.2`
+- Use semantic version tags such as `v1.0.3`
+- Keep the release title aligned with the tag, for example `NatsX v1.0.3`
 - Keep `wails.json`, `frontend/package.json`, and release assets on the same version
 
 ## Platform Asset Naming
@@ -44,7 +44,7 @@ At minimum, every public release should upload:
 
 - one Windows package
 - one Linux package
-- one per-package checksum file, for example `NatsX-1.0.2-windows-amd64.sha256.txt`
+- one per-package checksum file, for example `NatsX-1.0.3-windows-amd64.sha256.txt`
 - one combined checksum file: `SHA256SUMS`
 - one structured release manifest: `latest.json`
 
@@ -95,3 +95,4 @@ Before publishing:
 - Update checker: `internal/updatechecker/checker.go:15`
 - Windows release packaging: `scripts/release-windows.ps1:1`
 - Linux release packaging: `scripts/release-linux.sh:1`
+

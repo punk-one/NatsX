@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This document contains ready-to-use copy for the `NatsX 1.0.2` release.
+This document contains ready-to-use copy for the `NatsX 1.0.3` release.
 
 It covers:
 
@@ -16,17 +16,17 @@ It covers:
 
 ### Chinese
 
-`NatsX v1.0.2`
+`NatsX v1.0.3`
 
 ### English
 
-`NatsX v1.0.2`
+`NatsX v1.0.3`
 
 ## GitHub Release Body
 
 ### Chinese
 
-`NatsX 1.0.2` 鏄竴涓潰鍚?`NATS / JetStream` 鐨?Windows 妗岄潰瀹㈡埛绔紝鍩轰簬 `Go + Wails + React + Ant Design` 鏋勫缓锛岃仛鐒﹁繛鎺ョ鐞嗐€佹秷鎭敹鍙戙€乣Request / Reply` 璋冭瘯銆佹棩蹇楁煡鐪嬩笌 JetStream 杩愮淮銆?
+`NatsX 1.0.3` 鏄竴涓潰鍚?`NATS / JetStream` 鐨?Windows 妗岄潰瀹㈡埛绔紝鍩轰簬 `Go + Wails + React + Ant Design` 鏋勫缓锛岃仛鐒﹁繛鎺ョ鐞嗐€佹秷鎭敹鍙戙€乣Request / Reply` 璋冭瘯銆佹棩蹇楁煡鐪嬩笌 JetStream 杩愮淮銆?
 鏈鐗堟湰鍖呭惈锛?
 - 杩炴帴鍒涘缓銆佺紪杈戙€佸垹闄ゃ€佸垎缁勪笌鏈湴鎸佷箙鍖?- `No Auth`銆乣Username / Password`銆乣Token`銆乣TLS / mTLS`銆乣NKey`銆乣Credentials`
 - Subject 璁㈤槄銆佹秷鎭敹鍙戜笌澶氱杞借嵎瑙嗗浘
@@ -39,7 +39,7 @@ It covers:
 
 ### English
 
-`NatsX 1.0.2` is a Windows desktop client for `NATS / JetStream`, built with `Go + Wails + React + Ant Design`, focusing on connection management, messaging, `Request / Reply`, logging, and JetStream operations.
+`NatsX 1.0.3` is a Windows desktop client for `NATS / JetStream`, built with `Go + Wails + React + Ant Design`, focusing on connection management, messaging, `Request / Reply`, logging, and JetStream operations.
 
 Highlights in this release:
 
@@ -61,27 +61,28 @@ Project links:
 
 ### Chinese
 
-涓嬭浇 `NatsX 1.0.2`锛屼綋楠屼竴涓笓娉ㄤ簬 `NATS / JetStream` 鐨?Windows 妗岄潰瀹㈡埛绔紝閫傜敤浜庤繛鎺ョ鐞嗐€佹秷鎭皟璇曘€乣Request / Reply`銆佹棩蹇楁煡鐪嬩笌 JetStream 鎿嶄綔銆?
+涓嬭浇 `NatsX 1.0.3`锛屼綋楠屼竴涓笓娉ㄤ簬 `NATS / JetStream` 鐨?Windows 妗岄潰瀹㈡埛绔紝閫傜敤浜庤繛鎺ョ鐞嗐€佹秷鎭皟璇曘€乣Request / Reply`銆佹棩蹇楁煡鐪嬩笌 JetStream 鎿嶄綔銆?
 ### English
 
-Download `NatsX 1.0.2`, a Windows desktop client focused on `NATS / JetStream` workflows including connection management, messaging, `Request / Reply`, log inspection, and JetStream operations.
+Download `NatsX 1.0.3`, a Windows desktop client focused on `NATS / JetStream` workflows including connection management, messaging, `Request / Reply`, log inspection, and JetStream operations.
 
 ## Short Announcement
 
 ### Chinese
 
-`NatsX 1.0.2` 宸插彂甯冦€傝繖鏄竴涓潰鍚?`NATS / JetStream` 鐨?Windows 妗岄潰瀹㈡埛绔紝鏀寔杩炴帴绠＄悊銆佹秷鎭皟璇曘€佹棩蹇楁煡鐪嬩笌 JetStream 宸ヤ綔娴併€傞」鐩湴鍧€锛歚https://github.com/punk-one/NatsX`銆?
+`NatsX 1.0.3` 宸插彂甯冦€傝繖鏄竴涓潰鍚?`NATS / JetStream` 鐨?Windows 妗岄潰瀹㈡埛绔紝鏀寔杩炴帴绠＄悊銆佹秷鎭皟璇曘€佹棩蹇楁煡鐪嬩笌 JetStream 宸ヤ綔娴併€傞」鐩湴鍧€锛歚https://github.com/punk-one/NatsX`銆?
 ### English
 
-`NatsX 1.0.2` is now available. It is a Windows desktop client for `NATS / JetStream` with connection management, messaging, log inspection, and JetStream workflows. Project URL: `https://github.com/punk-one/NatsX`.
+`NatsX 1.0.3` is now available. It is a Windows desktop client for `NATS / JetStream` with connection management, messaging, log inspection, and JetStream workflows. Project URL: `https://github.com/punk-one/NatsX`.
 
 ## Social Post Copy
 
 ### Chinese
 
-`NatsX 1.0.2` 鍙戝竷浜嗐€備竴涓笓娉ㄤ簬 `NATS / JetStream` 鐨?Windows 妗岄潰瀹㈡埛绔紝鏀寔杩炴帴绠＄悊銆佹秷鎭敹鍙戙€乣Request / Reply`銆佹棩蹇楁煡鐪嬪拰 JetStream 杩愮淮銆傞」鐩湴鍧€锛歚https://github.com/punk-one/NatsX`
+`NatsX 1.0.3` 鍙戝竷浜嗐€備竴涓笓娉ㄤ簬 `NATS / JetStream` 鐨?Windows 妗岄潰瀹㈡埛绔紝鏀寔杩炴帴绠＄悊銆佹秷鎭敹鍙戙€乣Request / Reply`銆佹棩蹇楁煡鐪嬪拰 JetStream 杩愮淮銆傞」鐩湴鍧€锛歚https://github.com/punk-one/NatsX`
 
 ### English
 
-`NatsX 1.0.2` is out 鈥?a Windows desktop client focused on `NATS / JetStream`, with connection management, messaging, `Request / Reply`, log inspection, and JetStream operations. Project URL: `https://github.com/punk-one/NatsX`
+`NatsX 1.0.3` is out 鈥?a Windows desktop client focused on `NATS / JetStream`, with connection management, messaging, `Request / Reply`, log inspection, and JetStream operations. Project URL: `https://github.com/punk-one/NatsX`
+
 
