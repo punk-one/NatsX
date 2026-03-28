@@ -17,6 +17,7 @@ const (
 	releasesAPI    = "https://api.github.com/repos/punk-one/NatsX/releases"
 	repositoryURL  = "https://github.com/punk-one/NatsX"
 	requestTimeout = 10 * time.Second
+	manifestAsset  = "latest.json"
 )
 
 type Checker struct {
@@ -38,6 +39,26 @@ type githubReleaseAsset struct {
 	Name               string `json:"name"`
 	BrowserDownloadURL string `json:"browser_download_url"`
 	ContentType        string `json:"content_type"`
+}
+
+type releaseManifest struct {
+	SchemaVersion int                    `json:"schemaVersion"`
+	Product       string                 `json:"product"`
+	Version       string                 `json:"version"`
+	Tag           string                 `json:"tag"`
+	ReleaseURL    string                 `json:"releaseUrl"`
+	PublishedAt   time.Time              `json:"publishedAt"`
+	ReleaseNotes  string                 `json:"releaseNotes"`
+	Assets        []releaseManifestAsset `json:"assets"`
+}
+
+type releaseManifestAsset struct {
+	Platform    string `json:"platform"`
+	Name        string `json:"name"`
+	Kind        string `json:"kind"`
+	DownloadURL string `json:"downloadUrl"`
+	SHA256      string `json:"sha256"`
+	Size        int64  `json:"size"`
 }
 
 func New(currentVersion string) *Checker {
@@ -95,15 +116,139 @@ func (c *Checker) Check(ctx context.Context) (domain.UpdateInfo, error) {
 	info.PublishedAt = release.PublishedAt
 	info.ReleaseNotes = strings.TrimSpace(release.Body)
 
-	asset := pickBestAsset(release.Assets, info.Platform)
-	if asset != nil {
-		info.HasPlatformAsset = true
-		info.AssetName = asset.Name
-		info.DownloadURL = asset.BrowserDownloadURL
+	if manifest, ok := c.loadReleaseManifest(ctx, release); ok {
+		applyReleaseManifest(&info, manifest)
+	}
+
+	if !info.HasPlatformAsset {
+		asset := pickBestAsset(release.Assets, info.Platform)
+		if asset != nil {
+			info.HasPlatformAsset = true
+			info.AssetName = asset.Name
+			info.DownloadURL = asset.BrowserDownloadURL
+		}
 	}
 
 	info.HasUpdate = compareVersions(info.LatestVersion, info.CurrentVersion) > 0
 	return info, nil
+}
+
+func (c *Checker) loadReleaseManifest(ctx context.Context, release githubRelease) (releaseManifest, bool) {
+	asset := pickReleaseManifestAsset(release.Assets)
+	if asset == nil || strings.TrimSpace(asset.BrowserDownloadURL) == "" {
+		return releaseManifest{}, false
+	}
+
+	request, err := http.NewRequestWithContext(ctx, http.MethodGet, asset.BrowserDownloadURL, nil)
+	if err != nil {
+		return releaseManifest{}, false
+	}
+	request.Header.Set("Accept", "application/json")
+	request.Header.Set("User-Agent", "NatsX-UpdateChecker")
+
+	response, err := c.client.Do(request)
+	if err != nil {
+		return releaseManifest{}, false
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode != http.StatusOK {
+		return releaseManifest{}, false
+	}
+
+	var manifest releaseManifest
+	if err := json.NewDecoder(response.Body).Decode(&manifest); err != nil {
+		return releaseManifest{}, false
+	}
+
+	manifestVersion := normalizeVersion(firstNonEmpty(manifest.Version, manifest.Tag))
+	releaseVersion := normalizeVersion(release.TagName)
+	if manifestVersion != "" && releaseVersion != "" && manifestVersion != releaseVersion {
+		return releaseManifest{}, false
+	}
+
+	return manifest, true
+}
+
+func pickReleaseManifestAsset(assets []githubReleaseAsset) *githubReleaseAsset {
+	for index := range assets {
+		asset := &assets[index]
+		if strings.EqualFold(strings.TrimSpace(asset.Name), manifestAsset) {
+			return asset
+		}
+	}
+	return nil
+}
+
+func applyReleaseManifest(info *domain.UpdateInfo, manifest releaseManifest) {
+	if info == nil {
+		return
+	}
+
+	if version := normalizeVersion(firstNonEmpty(manifest.Version, manifest.Tag)); version != "" {
+		info.LatestVersion = version
+	}
+	if releaseURL := strings.TrimSpace(manifest.ReleaseURL); releaseURL != "" {
+		info.ReleaseURL = releaseURL
+	}
+	if !manifest.PublishedAt.IsZero() {
+		info.PublishedAt = manifest.PublishedAt
+	}
+	if notes := strings.TrimSpace(manifest.ReleaseNotes); notes != "" {
+		info.ReleaseNotes = notes
+	}
+
+	asset := pickBestManifestAsset(manifest.Assets, info.Platform)
+	if asset == nil {
+		return
+	}
+
+	info.HasPlatformAsset = true
+	info.AssetName = strings.TrimSpace(asset.Name)
+	info.DownloadURL = strings.TrimSpace(asset.DownloadURL)
+}
+
+func pickBestManifestAsset(assets []releaseManifestAsset, platform string) *releaseManifestAsset {
+	if len(assets) == 0 {
+		return nil
+	}
+
+	platformNeedle := strings.ToLower(strings.TrimSpace(platform))
+	var exactInstaller *releaseManifestAsset
+	var exactArchive *releaseManifestAsset
+	var fallback *releaseManifestAsset
+
+	for index := range assets {
+		asset := &assets[index]
+		if strings.ToLower(strings.TrimSpace(asset.Platform)) != platformNeedle {
+			continue
+		}
+
+		kind := strings.ToLower(strings.TrimSpace(asset.Kind))
+		switch kind {
+		case "installer":
+			if exactInstaller == nil {
+				exactInstaller = asset
+			}
+		case "archive":
+			if exactArchive == nil {
+				exactArchive = asset
+			}
+		default:
+			if fallback == nil {
+				fallback = asset
+			}
+		}
+	}
+
+	switch {
+	case exactInstaller != nil:
+		return exactInstaller
+	case exactArchive != nil:
+		return exactArchive
+	default:
+		return fallback
+	}
 }
 
 func pickLatestPublishedRelease(releases []githubRelease) (githubRelease, bool) {

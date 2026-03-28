@@ -101,7 +101,7 @@ import type {
 
 const { Header, Sider, Content } = Layout
 const appName = 'NatsX'
-const appVersion = '1.0.1'
+const appVersion = '1.0.2'
 const appLicense = 'Apache License 2.0'
 const appAuthor = 'punk-one'
 const requestIdHeader = 'X-NatsX-Request-Id'

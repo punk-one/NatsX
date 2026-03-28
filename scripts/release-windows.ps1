@@ -51,6 +51,16 @@ function New-ChecksumFile {
     Set-Content -Path $Destination -Value $lines -Encoding UTF8
 }
 
+function Set-Utf8NoBomContent {
+    param(
+        [string]$Path,
+        [string]$Content
+    )
+
+    $encoding = New-Object System.Text.UTF8Encoding($false)
+    [System.IO.File]::WriteAllText($Path, $Content, $encoding)
+}
+
 function New-CombinedChecksumFile {
     param(
         [string]$ReleaseRoot,
@@ -88,6 +98,83 @@ function New-CombinedChecksumFile {
     Set-Content -Path $Destination -Value $lines -Encoding UTF8
 }
 
+function Get-AssetKind {
+    param(
+        [string]$Name
+    )
+
+    $lowerName = $Name.ToLowerInvariant()
+    if ($lowerName.EndsWith(".exe") -or $lowerName.EndsWith(".msi")) {
+        return "installer"
+    }
+    if ($lowerName.EndsWith(".zip") -or $lowerName.EndsWith(".tar.gz") -or $lowerName.EndsWith(".appimage") -or $lowerName.EndsWith(".deb") -or $lowerName.EndsWith(".rpm")) {
+        return "archive"
+    }
+    return "asset"
+}
+
+function New-ReleaseManifest {
+    param(
+        [string]$ProductName,
+        [string]$ProductVersion,
+        [string]$PlatformTag,
+        [string]$ReleaseRoot,
+        [string]$ReleaseUrl,
+        [string]$ReleaseNotes,
+        [string[]]$AssetPaths,
+        [string]$Destination
+    )
+
+    $assets = @()
+    foreach ($path in $AssetPaths) {
+        if (-not (Test-Path $path)) {
+            continue
+        }
+
+        $item = Get-Item $path
+        if ($item.PSIsContainer) {
+            continue
+        }
+
+        $hash = (Get-FileHash -Path $item.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+        $assets += [ordered]@{
+            platform    = $PlatformTag
+            name        = $item.Name
+            kind        = Get-AssetKind -Name $item.Name
+            downloadUrl = "$ReleaseUrl/download/v$ProductVersion/$($item.Name)"
+            sha256      = $hash
+            size        = $item.Length
+        }
+    }
+
+    $existingAssets = @()
+    if (Test-Path $Destination) {
+        try {
+            $existing = Get-Content $Destination -Raw | ConvertFrom-Json
+            if ($existing.assets) {
+                $existingAssets = @($existing.assets | Where-Object { $_.platform -ne $PlatformTag })
+            }
+        }
+        catch {
+            $existingAssets = @()
+        }
+    }
+
+    $manifest = [ordered]@{
+        schemaVersion = 1
+        product       = $ProductName
+        version       = $ProductVersion
+        tag           = "v$ProductVersion"
+        releaseUrl    = "$ReleaseUrl/tag/v$ProductVersion"
+        publishedAt   = [DateTimeOffset]::Now.ToString("o")
+        releaseNotes  = $ReleaseNotes
+        assets        = @($existingAssets + $assets)
+    }
+
+    $json = $manifest | ConvertTo-Json -Depth 6
+    Set-Utf8NoBomContent -Path $Destination -Content $json
+}
+
 function New-ReleaseAssetList {
     param(
         [string]$ProductName,
@@ -97,6 +184,8 @@ function New-ReleaseAssetList {
         [string]$ZipPath,
         [string]$SetupPath,
         [string]$ChecksumPath,
+        [string]$CombinedChecksumPath,
+        [string]$LatestManifestPath,
         [string]$Destination
     )
 
@@ -121,6 +210,16 @@ function New-ReleaseAssetList {
         $lines.Add([string]::Format('- `{0}` - SHA256 checksum file ({1} bytes)', $checksumItem.Name, $checksumItem.Length))
     }
 
+    if (Test-Path $CombinedChecksumPath) {
+        $combinedChecksumItem = Get-Item $CombinedChecksumPath
+        $lines.Add([string]::Format('- `{0}` - Combined SHA256 checksum file ({1} bytes)', $combinedChecksumItem.Name, $combinedChecksumItem.Length))
+    }
+
+    if (Test-Path $LatestManifestPath) {
+        $latestManifestItem = Get-Item $LatestManifestPath
+        $lines.Add([string]::Format('- `{0}` - Structured release manifest ({1} bytes)', $latestManifestItem.Name, $latestManifestItem.Length))
+    }
+
     $lines.Add("")
     $lines.Add("## Staging Directory")
     $lines.Add("")
@@ -141,6 +240,7 @@ function New-ReleaseAssetList {
     $lines.Add("")
     $lines.Add('- Upload the portable `.zip` package')
     $lines.Add('- Upload the matching `.sha256.txt` file')
+    $lines.Add('- Upload `SHA256SUMS` and `latest.json`')
     $lines.Add('- Mark this release as a Windows desktop release')
     $lines.Add('- Add the project URL: `https://github.com/punk-one/NatsX`')
     $lines.Add("")
@@ -162,6 +262,8 @@ function New-GitHubReleaseDraft {
         [string]$ZipPath,
         [string]$ChecksumPath,
         [string]$SetupPath,
+        [string]$CombinedChecksumPath,
+        [string]$LatestManifestPath,
         [string]$Destination
     )
 
@@ -193,6 +295,16 @@ function New-GitHubReleaseDraft {
     if (Test-Path $ChecksumPath) {
         $checksumItem = Get-Item $ChecksumPath
         $lines.Add([string]::Format('- `{0}` ({1} bytes)', $checksumItem.Name, $checksumItem.Length))
+    }
+
+    if (Test-Path $CombinedChecksumPath) {
+        $combinedChecksumItem = Get-Item $CombinedChecksumPath
+        $lines.Add([string]::Format('- `{0}` ({1} bytes)', $combinedChecksumItem.Name, $combinedChecksumItem.Length))
+    }
+
+    if (Test-Path $LatestManifestPath) {
+        $latestManifestItem = Get-Item $LatestManifestPath
+        $lines.Add([string]::Format('- `{0}` ({1} bytes)', $latestManifestItem.Name, $latestManifestItem.Length))
     }
 
     if (Test-Path $SetupPath) {
@@ -238,6 +350,7 @@ $zipPath = Join-Path $releaseRoot "$releaseName.zip"
 $setupPath = Join-Path $releaseRoot "$productName-$productVersion-$platformTag-setup.exe"
 $checksumPath = Join-Path $releaseRoot "$releaseName.sha256.txt"
 $combinedChecksumPath = Join-Path $releaseRoot "SHA256SUMS"
+$latestManifestPath = Join-Path $releaseRoot "latest.json"
 $assetListPath = Join-Path $releaseRoot "$releaseName-assets.md"
 $githubDraftPath = Join-Path $releaseRoot "$releaseName-github-release.md"
 
@@ -328,6 +441,8 @@ Get-ChildItem -Recurse -File $stagingDir |
 
 Set-Content -Path $manifestPath -Value $manifestLines -Encoding UTF8
 
+$releaseNotesContent = Get-Content (Join-Path $root "RELEASE_NOTES.md") -Raw
+
 if (-not $SkipZip) {
     Write-Step "Creating zip package"
     if (Test-Path $zipPath) {
@@ -359,6 +474,15 @@ if (Test-Path $setupPath) {
 }
 New-ChecksumFile -Paths $checksumTargets -Destination $checksumPath
 New-CombinedChecksumFile -ReleaseRoot $releaseRoot -ProductName $productName -ProductVersion $productVersion -Destination $combinedChecksumPath
+New-ReleaseManifest `
+    -ProductName $productName `
+    -ProductVersion $productVersion `
+    -PlatformTag $platformTag `
+    -ReleaseRoot $releaseRoot `
+    -ReleaseUrl "https://github.com/punk-one/NatsX/releases" `
+    -ReleaseNotes $releaseNotesContent `
+    -AssetPaths $checksumTargets `
+    -Destination $latestManifestPath
 
 Write-Step "Writing release asset list"
 New-ReleaseAssetList `
@@ -369,6 +493,8 @@ New-ReleaseAssetList `
     -ZipPath $zipPath `
     -SetupPath $setupPath `
     -ChecksumPath $checksumPath `
+    -CombinedChecksumPath $combinedChecksumPath `
+    -LatestManifestPath $latestManifestPath `
     -Destination $assetListPath
 
 Write-Step "Writing GitHub release draft"
@@ -378,6 +504,8 @@ New-GitHubReleaseDraft `
     -ZipPath $zipPath `
     -ChecksumPath $checksumPath `
     -SetupPath $setupPath `
+    -CombinedChecksumPath $combinedChecksumPath `
+    -LatestManifestPath $latestManifestPath `
     -Destination $githubDraftPath
 
 Write-Step "Release artifacts ready"
@@ -390,5 +518,6 @@ if ($Nsis) {
 }
 Write-Host "Checksums:        $checksumPath" -ForegroundColor Green
 Write-Host "SHA256SUMS:       $combinedChecksumPath" -ForegroundColor Green
+Write-Host "Latest manifest:  $latestManifestPath" -ForegroundColor Green
 Write-Host "Asset list:       $assetListPath" -ForegroundColor Green
 Write-Host "GitHub draft:     $githubDraftPath" -ForegroundColor Green

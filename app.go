@@ -26,7 +26,7 @@ type App struct {
 	dbStore *storage.SQLiteStore
 }
 
-const currentAppVersion = "1.0.1"
+const currentAppVersion = "1.0.2"
 
 type WindowState struct {
 	Maximised  bool `json:"maximised"`

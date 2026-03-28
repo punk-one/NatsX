@@ -59,6 +59,98 @@ new_combined_checksum_file() {
   ) | awk '!seen[$2]++' > "$destination"
 }
 
+get_asset_kind() {
+  local name
+  name="$(echo "$1" | tr '[:upper:]' '[:lower:]')"
+  case "$name" in
+    *.exe|*.msi)
+      echo "installer"
+      ;;
+    *.zip|*.tar.gz|*.appimage|*.deb|*.rpm)
+      echo "archive"
+      ;;
+    *)
+      echo "asset"
+      ;;
+  esac
+}
+
+new_release_manifest() {
+  local product_name="$1"
+  local product_version="$2"
+  local platform_tag="$3"
+  local release_notes="$4"
+  local destination="$5"
+  shift 5
+  local asset_paths=("$@")
+
+  python3 - "$product_name" "$product_version" "$platform_tag" "$release_notes" "$destination" "${asset_paths[@]}" <<'PY'
+import hashlib
+import json
+import os
+import sys
+from datetime import datetime, timezone
+
+product_name = sys.argv[1]
+product_version = sys.argv[2]
+platform_tag = sys.argv[3]
+release_notes = sys.argv[4]
+destination = sys.argv[5]
+asset_paths = sys.argv[6:]
+
+def asset_kind(name: str) -> str:
+    lowered = name.lower()
+    if lowered.endswith((".exe", ".msi")):
+        return "installer"
+    if lowered.endswith((".zip", ".tar.gz", ".appimage", ".deb", ".rpm")):
+        return "archive"
+    return "asset"
+
+assets = []
+for path in asset_paths:
+    if not path or not os.path.isfile(path):
+        continue
+    with open(path, "rb") as file:
+        sha256 = hashlib.sha256(file.read()).hexdigest()
+    name = os.path.basename(path)
+    assets.append({
+        "platform": platform_tag,
+        "name": name,
+        "kind": asset_kind(name),
+        "downloadUrl": f"https://github.com/punk-one/NatsX/releases/download/v{product_version}/{name}",
+        "sha256": sha256,
+        "size": os.path.getsize(path),
+    })
+
+existing_assets = []
+if os.path.exists(destination):
+    try:
+        with open(destination, "r", encoding="utf-8-sig") as file:
+            existing = json.load(file)
+        existing_assets = [
+            item for item in existing.get("assets", [])
+            if item.get("platform") != platform_tag
+        ]
+    except Exception:
+        existing_assets = []
+
+manifest = {
+    "schemaVersion": 1,
+    "product": product_name,
+    "version": product_version,
+    "tag": f"v{product_version}",
+    "releaseUrl": f"https://github.com/punk-one/NatsX/releases/tag/v{product_version}",
+    "publishedAt": datetime.now(timezone.utc).isoformat(),
+    "releaseNotes": release_notes,
+    "assets": existing_assets + assets,
+}
+
+with open(destination, "w", encoding="utf-8") as file:
+    json.dump(manifest, file, ensure_ascii=False, indent=2)
+    file.write("\n")
+PY
+}
+
 new_release_asset_list() {
   local product_name="$1"
   local product_version="$2"
@@ -66,7 +158,9 @@ new_release_asset_list() {
   local staging_dir="$4"
   local tar_path="$5"
   local checksum_path="$6"
-  local destination="$7"
+  local combined_checksum_path="$7"
+  local latest_manifest_path="$8"
+  local destination="$9"
 
   {
     echo "# $product_name $product_version Release Assets"
@@ -78,6 +172,12 @@ new_release_asset_list() {
     fi
     if [[ -f "$checksum_path" ]]; then
       echo "- \`$(basename "$checksum_path")\` - SHA256 checksum file ($(stat -c%s "$checksum_path") bytes)"
+    fi
+    if [[ -f "$combined_checksum_path" ]]; then
+      echo "- \`$(basename "$combined_checksum_path")\` - Combined SHA256 checksum file ($(stat -c%s "$combined_checksum_path") bytes)"
+    fi
+    if [[ -f "$latest_manifest_path" ]]; then
+      echo "- \`$(basename "$latest_manifest_path")\` - Structured release manifest ($(stat -c%s "$latest_manifest_path") bytes)"
     fi
     echo
     echo "## Staging Directory"
@@ -99,6 +199,7 @@ new_release_asset_list() {
     echo
     echo "- Upload the portable \`.tar.gz\` package"
     echo "- Upload the matching \`.sha256.txt\` file"
+    echo "- Upload \`SHA256SUMS\` and \`latest.json\`"
     echo "- Mark this release as a Linux desktop release"
     echo "- Add the project URL: \`https://github.com/punk-one/NatsX\`"
     echo
@@ -115,7 +216,9 @@ new_github_release_draft() {
   local product_version="$2"
   local tar_path="$3"
   local checksum_path="$4"
-  local destination="$5"
+  local combined_checksum_path="$5"
+  local latest_manifest_path="$6"
+  local destination="$7"
 
   {
     echo "# $product_name v$product_version"
@@ -138,6 +241,8 @@ new_github_release_draft() {
     echo
     [[ -f "$tar_path" ]] && echo "- \`$(basename "$tar_path")\` ($(stat -c%s "$tar_path") bytes)"
     [[ -f "$checksum_path" ]] && echo "- \`$(basename "$checksum_path")\` ($(stat -c%s "$checksum_path") bytes)"
+    [[ -f "$combined_checksum_path" ]] && echo "- \`$(basename "$combined_checksum_path")\` ($(stat -c%s "$combined_checksum_path") bytes)"
+    [[ -f "$latest_manifest_path" ]] && echo "- \`$(basename "$latest_manifest_path")\` ($(stat -c%s "$latest_manifest_path") bytes)"
     echo
     echo "## Project"
     echo
@@ -190,6 +295,7 @@ STAGING_DIR="$RELEASE_ROOT/$RELEASE_NAME"
 TAR_PATH="$RELEASE_ROOT/$RELEASE_NAME.tar.gz"
 CHECKSUM_PATH="$RELEASE_ROOT/$RELEASE_NAME.sha256.txt"
 COMBINED_CHECKSUM_PATH="$RELEASE_ROOT/SHA256SUMS"
+LATEST_MANIFEST_PATH="$RELEASE_ROOT/latest.json"
 ASSET_LIST_PATH="$RELEASE_ROOT/$RELEASE_NAME-assets.md"
 GITHUB_DRAFT_PATH="$RELEASE_ROOT/$RELEASE_NAME-github-release.md"
 
@@ -256,6 +362,8 @@ MANIFEST_PATH="$STAGING_DIR/release-manifest.txt"
   done
 } > "$MANIFEST_PATH"
 
+RELEASE_NOTES_CONTENT="$(cat "$ROOT/RELEASE_NOTES.md")"
+
 if [[ "$SKIP_TAR" != "1" ]]; then
   write_step "Creating tar.gz package"
   rm -f "$TAR_PATH"
@@ -267,6 +375,13 @@ CHECKSUM_TARGETS=()
 [[ -f "$TAR_PATH" ]] && CHECKSUM_TARGETS+=("$TAR_PATH")
 new_checksum_file "$CHECKSUM_PATH" "${CHECKSUM_TARGETS[@]}"
 new_combined_checksum_file "$RELEASE_ROOT" "$PRODUCT_NAME" "$PRODUCT_VERSION" "$COMBINED_CHECKSUM_PATH"
+new_release_manifest \
+  "$PRODUCT_NAME" \
+  "$PRODUCT_VERSION" \
+  "$PLATFORM_TAG" \
+  "$RELEASE_NOTES_CONTENT" \
+  "$LATEST_MANIFEST_PATH" \
+  "${CHECKSUM_TARGETS[@]}"
 
 write_step "Writing release asset list"
 new_release_asset_list \
@@ -276,6 +391,8 @@ new_release_asset_list \
   "$STAGING_DIR" \
   "$TAR_PATH" \
   "$CHECKSUM_PATH" \
+  "$COMBINED_CHECKSUM_PATH" \
+  "$LATEST_MANIFEST_PATH" \
   "$ASSET_LIST_PATH"
 
 write_step "Writing GitHub release draft"
@@ -284,6 +401,8 @@ new_github_release_draft \
   "$PRODUCT_VERSION" \
   "$TAR_PATH" \
   "$CHECKSUM_PATH" \
+  "$COMBINED_CHECKSUM_PATH" \
+  "$LATEST_MANIFEST_PATH" \
   "$GITHUB_DRAFT_PATH"
 
 write_step "Linux release artifacts ready"
@@ -291,5 +410,6 @@ echo "Staging directory: $STAGING_DIR"
 [[ -f "$TAR_PATH" ]] && echo "Tar package:      $TAR_PATH"
 echo "Checksums:        $CHECKSUM_PATH"
 echo "SHA256SUMS:       $COMBINED_CHECKSUM_PATH"
+echo "Latest manifest:  $LATEST_MANIFEST_PATH"
 echo "Asset list:       $ASSET_LIST_PATH"
 echo "GitHub draft:     $GITHUB_DRAFT_PATH"

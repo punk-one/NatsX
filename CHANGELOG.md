@@ -2,6 +2,26 @@
 
 All notable changes to `NatsX` will be documented in this file.
 
+## [1.0.2] - 2026-03-28
+
+### Added
+
+- Cross-platform release packaging for `Windows` and `Linux`
+- Stable release metadata asset `latest.json` for future updater compatibility
+- Combined release checksum file `SHA256SUMS`
+- Linux release automation via `scripts/release-linux.sh`
+
+### Changed
+
+- Update checking now prefers structured release metadata when `latest.json` is attached to the latest GitHub Release
+- Release tooling now keeps release metadata aligned across packaged assets and GitHub uploads
+- Release collateral updated for the `1.0.2` desktop release
+
+### Notes
+
+- `v1.0.2` is the first `NatsX` release published with both `windows-amd64` and `linux-amd64` artifacts
+- Manual upgrade remains supported through GitHub Releases and direct package download
+
 ## [1.0.1] - 2026-03-23
 
 ### Added

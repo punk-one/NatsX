@@ -116,15 +116,15 @@ const defaultAppSettings: AppSettings = {
   logRetention: { ...defaultLogRetentionSettings },
 }
 const mockUpdateInfo: UpdateInfo = {
-  currentVersion: '1.0.1',
-  latestVersion: '1.0.2',
+  currentVersion: '1.0.2',
+  latestVersion: '1.0.3',
   releaseFound: true,
   hasUpdate: true,
   hasPlatformAsset: true,
   platform: 'windows-amd64',
-  releaseUrl: 'https://github.com/punk-one/NatsX/releases/tag/v1.0.2',
-  downloadUrl: 'https://github.com/punk-one/NatsX/releases/download/v1.0.2/NatsX-1.0.2-windows-amd64-setup.exe',
-  assetName: 'NatsX-1.0.2-windows-amd64-setup.exe',
+  releaseUrl: 'https://github.com/punk-one/NatsX/releases/tag/v1.0.3',
+  downloadUrl: 'https://github.com/punk-one/NatsX/releases/download/v1.0.3/NatsX-1.0.3-windows-amd64.zip',
+  assetName: 'NatsX-1.0.3-windows-amd64.zip',
   publishedAt: createTimestamp(),
   releaseNotes: 'Mock release notes for update preview.',
 }

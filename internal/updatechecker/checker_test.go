@@ -54,3 +54,34 @@ func TestPickLatestPublishedRelease(t *testing.T) {
 		t.Fatalf("expected v1.0.1, got %q", selected.TagName)
 	}
 }
+
+func TestPickReleaseManifestAsset(t *testing.T) {
+	assets := []githubReleaseAsset{
+		{Name: "NatsX-1.0.2-windows-amd64.zip"},
+		{Name: "latest.json", BrowserDownloadURL: "manifest"},
+	}
+
+	selected := pickReleaseManifestAsset(assets)
+	if selected == nil {
+		t.Fatal("expected manifest asset")
+	}
+	if selected.BrowserDownloadURL != "manifest" {
+		t.Fatalf("expected manifest url, got %q", selected.BrowserDownloadURL)
+	}
+}
+
+func TestPickBestManifestAsset(t *testing.T) {
+	assets := []releaseManifestAsset{
+		{Platform: "windows-amd64", Name: "NatsX-1.0.2-windows-amd64.zip", Kind: "archive", DownloadURL: "zip"},
+		{Platform: "windows-amd64", Name: "NatsX-1.0.2-windows-amd64-setup.exe", Kind: "installer", DownloadURL: "setup"},
+		{Platform: "linux-amd64", Name: "NatsX-1.0.2-linux-amd64.tar.gz", Kind: "archive", DownloadURL: "linux"},
+	}
+
+	selected := pickBestManifestAsset(assets, "windows-amd64")
+	if selected == nil {
+		t.Fatal("expected manifest asset")
+	}
+	if selected.DownloadURL != "setup" {
+		t.Fatalf("expected installer manifest asset, got %q", selected.DownloadURL)
+	}
+}

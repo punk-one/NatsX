@@ -1,8 +1,8 @@
-# NatsX Screenshot Plan
+﻿# NatsX Screenshot Plan
 
 ## Goal
 
-This document defines the recommended screenshots for the `1.0.1` release.
+This document defines the recommended screenshots for the `1.0.2` release.
 
 The aim is to produce a consistent set of images for:
 
@@ -214,13 +214,13 @@ Suggested final set:
 
 ```text
 docs/screenshots/
-├─ 01-shell.png
-├─ 02-messages.png
-├─ 03-request-reply.png
-├─ 04-history.png
-├─ 05-jetstream.png
-├─ 06-connection-editor.png
-└─ 07-import-export.png
+鈹溾攢 01-shell.png
+鈹溾攢 02-messages.png
+鈹溾攢 03-request-reply.png
+鈹溾攢 04-history.png
+鈹溾攢 05-jetstream.png
+鈹溾攢 06-connection-editor.png
+鈹斺攢 07-import-export.png
 ```
 
 ## Final Check
@@ -230,4 +230,5 @@ Before using screenshots publicly, confirm:
 - all text is readable
 - no sensitive data is visible
 - selected states are obvious
-- the UI matches the current `1.0.1` build
+- the UI matches the current `1.0.2` build
+

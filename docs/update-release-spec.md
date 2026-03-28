@@ -11,8 +11,8 @@ This document defines the minimum publishing rules that keep the built-in update
 
 ## Tag and Version Rules
 
-- Use semantic version tags such as `v1.0.1`
-- Keep the release title aligned with the tag, for example `NatsX v1.0.1`
+- Use semantic version tags such as `v1.0.2`
+- Keep the release title aligned with the tag, for example `NatsX v1.0.2`
 - Keep `wails.json`, `frontend/package.json`, and release assets on the same version
 
 ## Platform Asset Naming
@@ -44,13 +44,14 @@ At minimum, every public release should upload:
 
 - one Windows package
 - one Linux package
-- one per-package checksum file, for example `NatsX-1.0.1-windows-amd64.sha256.txt`
+- one per-package checksum file, for example `NatsX-1.0.2-windows-amd64.sha256.txt`
 - one combined checksum file: `SHA256SUMS`
+- one structured release manifest: `latest.json`
 
 Optional assets:
 
 - Windows installer package
-- platform-specific notes or manifests
+- additional release helper documents
 
 ## Release Body
 
@@ -62,6 +63,21 @@ Recommended body content:
 - project links
 
 The body can be edited freely because the updater does not parse markdown sections from the release notes.
+
+## Release Manifest
+
+The updater can now consume an optional `latest.json` asset from the newest public release.
+
+Recommended content:
+
+- `schemaVersion`
+- `product`
+- `version`
+- `tag`
+- `releaseUrl`
+- `publishedAt`
+- `releaseNotes`
+- `assets[]` with `platform`, `name`, `kind`, `downloadUrl`, `sha256`, and `size`
 
 ## Operational Checklist
 
