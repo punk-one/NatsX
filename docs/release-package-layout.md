@@ -51,6 +51,7 @@ release/
 ## Notes
 
 - The script reads version metadata from `wails.json`
+- The recommended GitHub tag format is `v1.0.1`
 - The zip package is intended for portable distribution
 - The setup package is intended for installer-style Windows distribution
 - The installer is optional and is not required for the current release

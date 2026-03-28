@@ -1,13 +1,19 @@
 # GitHub Release Final Copy
 
+## Release Tag
+
+`v1.0.1`
+
 ## Release Title
 
-`NatsX 1.0.1 Windows Desktop Release`
+`NatsX v1.0.1`
 
 ## Release Body
 
 ```markdown
-# NatsX 1.0.1 Windows Desktop Release
+# NatsX v1.0.1
+
+Windows Desktop Release for `NATS / JetStream`
 
 中文 | English
 

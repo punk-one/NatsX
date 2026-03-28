@@ -16,11 +16,11 @@ It covers:
 
 ### Chinese
 
-`NatsX 1.0.1 Windows Desktop Release`
+`NatsX v1.0.1`
 
 ### English
 
-`NatsX 1.0.1 Windows Desktop Release`
+`NatsX v1.0.1`
 
 ## GitHub Release Body
 

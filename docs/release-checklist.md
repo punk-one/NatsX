@@ -4,6 +4,7 @@
 
 - Product: `NatsX`
 - Version: `1.0.1`
+- Tag: `v1.0.1`
 - Release date: `2026-03-23`
 - Author: `punk-one`
 - License: `Apache License 2.0`
@@ -157,6 +158,7 @@ This package is optional and is not required for the `1.0.1` release.
 
 Before publishing:
 
+- Confirm Git tag uses the format `v1.0.1`
 - Confirm version in `wails.json`
 - Confirm changelog and release notes match the actual release
 - Confirm icon assets are correct

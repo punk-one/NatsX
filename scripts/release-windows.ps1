@@ -91,7 +91,8 @@ function New-ReleaseAssetList {
     $lines.Add("")
     $lines.Add("## Recommended Release Title")
     $lines.Add("")
-    $lines.Add([string]::Format('- `{0} {1} Windows Desktop Release`', $ProductName, $ProductVersion))
+    $lines.Add([string]::Format('- Tag: `v{0}`', $ProductVersion))
+    $lines.Add([string]::Format('- Title: `{0} v{1}`', $ProductName, $ProductVersion))
     $lines.Add("")
     $lines.Add("## Recommended Release Body")
     $lines.Add("")
@@ -128,7 +129,9 @@ function New-GitHubReleaseDraft {
     )
 
     $lines = New-Object System.Collections.Generic.List[string]
-    $lines.Add([string]::Format('# {0} {1} Windows Desktop Release', $ProductName, $ProductVersion))
+    $lines.Add([string]::Format('# {0} v{1}', $ProductName, $ProductVersion))
+    $lines.Add("")
+    $lines.Add('Windows Desktop Release for `NATS / JetStream`')
     $lines.Add("")
     $lines.Add([string]::Format('`{0} {1}` is a Windows desktop client for `NATS / JetStream`, built with `Go + Wails + React + Ant Design`.', $ProductName, $ProductVersion))
     $lines.Add("")
