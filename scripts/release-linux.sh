@@ -31,6 +31,34 @@ new_checksum_file() {
   done
 }
 
+new_combined_checksum_file() {
+  local release_root="$1"
+  local product_name="$2"
+  local product_version="$3"
+  local destination="$4"
+
+  local patterns=(
+    "$product_name-$product_version-*.zip"
+    "$product_name-$product_version-*.tar.gz"
+    "$product_name-$product_version-*.exe"
+    "$product_name-$product_version-*.msi"
+    "$product_name-$product_version-*.AppImage"
+    "$product_name-$product_version-*.deb"
+    "$product_name-$product_version-*.rpm"
+  )
+
+  : > "$destination"
+  (
+    shopt -s nullglob
+    for pattern in "${patterns[@]}"; do
+      for path in "$release_root"/$pattern; do
+        [[ -f "$path" ]] || continue
+        sha256sum "$path"
+      done
+    done
+  ) | awk '!seen[$2]++' > "$destination"
+}
+
 new_release_asset_list() {
   local product_name="$1"
   local product_version="$2"
@@ -161,6 +189,7 @@ RELEASE_ROOT="${OUTPUT_DIR:-$ROOT/release}"
 STAGING_DIR="$RELEASE_ROOT/$RELEASE_NAME"
 TAR_PATH="$RELEASE_ROOT/$RELEASE_NAME.tar.gz"
 CHECKSUM_PATH="$RELEASE_ROOT/$RELEASE_NAME.sha256.txt"
+COMBINED_CHECKSUM_PATH="$RELEASE_ROOT/SHA256SUMS"
 ASSET_LIST_PATH="$RELEASE_ROOT/$RELEASE_NAME-assets.md"
 GITHUB_DRAFT_PATH="$RELEASE_ROOT/$RELEASE_NAME-github-release.md"
 
@@ -237,6 +266,7 @@ write_step "Writing checksums"
 CHECKSUM_TARGETS=()
 [[ -f "$TAR_PATH" ]] && CHECKSUM_TARGETS+=("$TAR_PATH")
 new_checksum_file "$CHECKSUM_PATH" "${CHECKSUM_TARGETS[@]}"
+new_combined_checksum_file "$RELEASE_ROOT" "$PRODUCT_NAME" "$PRODUCT_VERSION" "$COMBINED_CHECKSUM_PATH"
 
 write_step "Writing release asset list"
 new_release_asset_list \
@@ -260,5 +290,6 @@ write_step "Linux release artifacts ready"
 echo "Staging directory: $STAGING_DIR"
 [[ -f "$TAR_PATH" ]] && echo "Tar package:      $TAR_PATH"
 echo "Checksums:        $CHECKSUM_PATH"
+echo "SHA256SUMS:       $COMBINED_CHECKSUM_PATH"
 echo "Asset list:       $ASSET_LIST_PATH"
 echo "GitHub draft:     $GITHUB_DRAFT_PATH"

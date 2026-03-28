@@ -51,6 +51,43 @@ function New-ChecksumFile {
     Set-Content -Path $Destination -Value $lines -Encoding UTF8
 }
 
+function New-CombinedChecksumFile {
+    param(
+        [string]$ReleaseRoot,
+        [string]$ProductName,
+        [string]$ProductVersion,
+        [string]$Destination
+    )
+
+    $patterns = @(
+        "$ProductName-$ProductVersion-*.zip",
+        "$ProductName-$ProductVersion-*.tar.gz",
+        "$ProductName-$ProductVersion-*.exe",
+        "$ProductName-$ProductVersion-*.msi",
+        "$ProductName-$ProductVersion-*.AppImage",
+        "$ProductName-$ProductVersion-*.deb",
+        "$ProductName-$ProductVersion-*.rpm"
+    )
+
+    $items = New-Object System.Collections.Generic.List[System.IO.FileInfo]
+    foreach ($pattern in $patterns) {
+        Get-ChildItem -Path $ReleaseRoot -File -Filter $pattern -ErrorAction SilentlyContinue |
+            Where-Object { $_.Name -notlike "*.sha256.txt" } |
+            ForEach-Object { [void]$items.Add($_) }
+    }
+
+    $uniqueItems = $items |
+        Sort-Object FullName -Unique
+
+    $lines = @()
+    foreach ($item in $uniqueItems) {
+        $hash = Get-FileHash -Path $item.FullName -Algorithm SHA256
+        $lines += "{0} *{1}" -f $hash.Hash.ToLowerInvariant(), $item.Name
+    }
+
+    Set-Content -Path $Destination -Value $lines -Encoding UTF8
+}
+
 function New-ReleaseAssetList {
     param(
         [string]$ProductName,
@@ -200,6 +237,7 @@ $stagingDir = Join-Path $releaseRoot $releaseName
 $zipPath = Join-Path $releaseRoot "$releaseName.zip"
 $setupPath = Join-Path $releaseRoot "$productName-$productVersion-$platformTag-setup.exe"
 $checksumPath = Join-Path $releaseRoot "$releaseName.sha256.txt"
+$combinedChecksumPath = Join-Path $releaseRoot "SHA256SUMS"
 $assetListPath = Join-Path $releaseRoot "$releaseName-assets.md"
 $githubDraftPath = Join-Path $releaseRoot "$releaseName-github-release.md"
 
@@ -320,6 +358,7 @@ if (Test-Path $setupPath) {
     $checksumTargets += $setupPath
 }
 New-ChecksumFile -Paths $checksumTargets -Destination $checksumPath
+New-CombinedChecksumFile -ReleaseRoot $releaseRoot -ProductName $productName -ProductVersion $productVersion -Destination $combinedChecksumPath
 
 Write-Step "Writing release asset list"
 New-ReleaseAssetList `
@@ -350,5 +389,6 @@ if ($Nsis) {
     Write-Host "NSIS installer:   $setupPath" -ForegroundColor Green
 }
 Write-Host "Checksums:        $checksumPath" -ForegroundColor Green
+Write-Host "SHA256SUMS:       $combinedChecksumPath" -ForegroundColor Green
 Write-Host "Asset list:       $assetListPath" -ForegroundColor Green
 Write-Host "GitHub draft:     $githubDraftPath" -ForegroundColor Green
