@@ -1,0 +1,95 @@
+export type ThemeMode = 'light' | 'dark' | 'system'
+export type ResolvedTheme = 'light' | 'dark'
+
+export interface ThemePalette {
+  colorBgApp: string
+  colorBgPage: string
+  colorBgPanel: string
+  colorBgPanelSecondary: string
+  colorBgPanelTertiary: string
+  colorBgElevated: string
+  colorBgMask: string
+  colorBgGradientPrimary: string
+  colorBgGradientSecondary: string
+  colorChromeBg: string
+  colorChromeBgSecondary: string
+  colorSidebarBg: string
+  colorSidebarBorder: string
+  colorSidebarItem: string
+  colorSidebarItemHover: string
+  colorSidebarItemHoverBg: string
+  colorSidebarItemActive: string
+  colorSidebarItemActiveBg: string
+  colorWindowControl: string
+  colorWindowControlHoverBg: string
+  colorWindowControlDangerHoverBg: string
+  colorBorder: string
+  colorBorderSecondary: string
+  colorBorderStrong: string
+  colorText: string
+  colorTextSecondary: string
+  colorTextTertiary: string
+  colorTextQuaternary: string
+  colorTextInverse: string
+  colorTextLink: string
+  colorPrimary: string
+  colorPrimaryHover: string
+  colorPrimaryActive: string
+  colorPrimaryBg: string
+  colorSuccess: string
+  colorSuccessBg: string
+  colorWarning: string
+  colorWarningBg: string
+  colorError: string
+  colorErrorBg: string
+  colorInfo: string
+  colorInfoBg: string
+  colorInputBg: string
+  colorInputBorder: string
+  colorInputPlaceholder: string
+  colorTableHeaderBg: string
+  colorTableHeaderText: string
+  colorConnectionBg: string
+  colorConnectionItemHoverBg: string
+  colorConnectionItemActiveBg: string
+  colorConnectionItemActiveText: string
+  colorMessageStreamBg: string
+  colorMessageInboundBg: string
+  colorMessageInboundBorder: string
+  colorMessageInboundAccent: string
+  colorMessageOutboundBg: string
+  colorMessageOutboundBgSecondary: string
+  colorMessageOutboundBorder: string
+  colorMessageOutboundText: string
+  colorMessageCodeBg: string
+  colorMessageMeta: string
+  colorMessageSelectedRing: string
+  colorComposerBg: string
+  colorComposerToolbarBg: string
+  colorComposerEditorBg: string
+  colorComposerTextareaBg: string
+  colorComposerTextareaBorder: string
+  colorComposerFabBg: string
+  colorComposerFabHover: string
+  colorComposerFabText: string
+  colorJsAccent: string
+  colorRequestBg: string
+  colorResponseBg: string
+  colorLogBg: string
+  colorLogLineHover: string
+  colorDiffAddBg: string
+  colorDiffAddText: string
+  colorDiffRemoveBg: string
+  colorDiffRemoveText: string
+  colorShadowSm: string
+  colorShadowMd: string
+  colorShadowLg: string
+}
+
+export interface ThemeDefinition {
+  mode: ResolvedTheme
+  borderRadius: number
+  controlHeight: number
+  fontSize: number
+  palette: ThemePalette
+}
