@@ -891,6 +891,9 @@ export namespace domain {
 	    latestVersion: string;
 	    releaseUrl?: string;
 	    downloadUrl?: string;
+	    expectedSha256?: string;
+	    verifiedSha256?: string;
+	    verified: boolean;
 	    bytes: number;
 	    // Go type: time
 	    downloadedAt: any;
@@ -906,6 +909,9 @@ export namespace domain {
 	        this.latestVersion = source["latestVersion"];
 	        this.releaseUrl = source["releaseUrl"];
 	        this.downloadUrl = source["downloadUrl"];
+	        this.expectedSha256 = source["expectedSha256"];
+	        this.verifiedSha256 = source["verifiedSha256"];
+	        this.verified = source["verified"];
 	        this.bytes = source["bytes"];
 	        this.downloadedAt = this.convertValues(source["downloadedAt"], null);
 	    }
@@ -938,6 +944,8 @@ export namespace domain {
 	    releaseUrl?: string;
 	    downloadUrl?: string;
 	    assetName?: string;
+	    assetSha256?: string;
+	    assetSize?: number;
 	    // Go type: time
 	    publishedAt?: any;
 	    releaseNotes?: string;
@@ -957,6 +965,8 @@ export namespace domain {
 	        this.releaseUrl = source["releaseUrl"];
 	        this.downloadUrl = source["downloadUrl"];
 	        this.assetName = source["assetName"];
+	        this.assetSha256 = source["assetSha256"];
+	        this.assetSize = source["assetSize"];
 	        this.publishedAt = this.convertValues(source["publishedAt"], null);
 	        this.releaseNotes = source["releaseNotes"];
 	    }

@@ -125,6 +125,8 @@ const mockUpdateInfo: UpdateInfo = {
   releaseUrl: 'https://github.com/punk-one/NatsX/releases/tag/v1.0.4',
   downloadUrl: 'https://github.com/punk-one/NatsX/releases/download/v1.0.4/NatsX-1.0.4-windows-amd64.zip',
   assetName: 'NatsX-1.0.4-windows-amd64.zip',
+  assetSha256: '1b83b14cc34e3f701f64774ccfe44feee200c2f4356abf2285650df8704992b9',
+  assetSize: 7131033,
   publishedAt: createTimestamp(),
   releaseNotes: 'Mock release notes for update preview.',
 }
@@ -1079,6 +1081,9 @@ async function mockCall<T>(method: MethodName, args: unknown[]): Promise<T> {
         latestVersion: mockUpdateInfo.latestVersion,
         releaseUrl: mockUpdateInfo.releaseUrl,
         downloadUrl: mockUpdateInfo.downloadUrl,
+        expectedSha256: mockUpdateInfo.assetSha256,
+        verifiedSha256: mockUpdateInfo.assetSha256,
+        verified: true,
         bytes: 128 * 1024 * 1024,
         downloadedAt: createTimestamp(),
       }

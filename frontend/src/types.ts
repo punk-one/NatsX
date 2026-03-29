@@ -51,6 +51,8 @@ export interface UpdateInfo {
   releaseUrl?: string
   downloadUrl?: string
   assetName?: string
+  assetSha256?: string
+  assetSize?: number
   publishedAt?: string
   releaseNotes?: string
 }
@@ -61,18 +63,23 @@ export interface UpdateDownloadResult {
   latestVersion: string
   releaseUrl?: string
   downloadUrl?: string
+  expectedSha256?: string
+  verifiedSha256?: string
+  verified: boolean
   bytes: number
   downloadedAt: string
 }
 
 export interface UpdateDownloadProgress {
-  status: 'downloading' | 'completed' | 'error'
+  status: 'downloading' | 'verifying' | 'completed' | 'error'
   latestVersion?: string
   assetName?: string
   path?: string
   downloadedBytes: number
   totalBytes: number
   progressPercent: number
+  expectedSha256?: string
+  verifiedSha256?: string
   errorMessage?: string
 }
 

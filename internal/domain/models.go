@@ -48,18 +48,23 @@ type UpdateInfo struct {
 	ReleaseURL       string    `json:"releaseUrl,omitempty"`
 	DownloadURL      string    `json:"downloadUrl,omitempty"`
 	AssetName        string    `json:"assetName,omitempty"`
+	AssetSHA256      string    `json:"assetSha256,omitempty"`
+	AssetSize        int64     `json:"assetSize,omitempty"`
 	PublishedAt      time.Time `json:"publishedAt,omitempty"`
 	ReleaseNotes     string    `json:"releaseNotes,omitempty"`
 }
 
 type UpdateDownloadResult struct {
-	Path          string    `json:"path"`
-	AssetName     string    `json:"assetName"`
-	LatestVersion string    `json:"latestVersion"`
-	ReleaseURL    string    `json:"releaseUrl,omitempty"`
-	DownloadURL   string    `json:"downloadUrl,omitempty"`
-	Bytes         int64     `json:"bytes"`
-	DownloadedAt  time.Time `json:"downloadedAt"`
+	Path           string    `json:"path"`
+	AssetName      string    `json:"assetName"`
+	LatestVersion  string    `json:"latestVersion"`
+	ReleaseURL     string    `json:"releaseUrl,omitempty"`
+	DownloadURL    string    `json:"downloadUrl,omitempty"`
+	ExpectedSHA256 string    `json:"expectedSha256,omitempty"`
+	VerifiedSHA256 string    `json:"verifiedSha256,omitempty"`
+	Verified       bool      `json:"verified"`
+	Bytes          int64     `json:"bytes"`
+	DownloadedAt   time.Time `json:"downloadedAt"`
 }
 
 type UpdateDownloadProgress struct {
@@ -70,6 +75,8 @@ type UpdateDownloadProgress struct {
 	DownloadedBytes int64   `json:"downloadedBytes"`
 	TotalBytes      int64   `json:"totalBytes"`
 	ProgressPercent float64 `json:"progressPercent"`
+	ExpectedSHA256  string  `json:"expectedSha256,omitempty"`
+	VerifiedSHA256  string  `json:"verifiedSha256,omitempty"`
 	ErrorMessage    string  `json:"errorMessage,omitempty"`
 }
 

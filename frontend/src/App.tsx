@@ -555,7 +555,7 @@ export default function App() {
       })
       const result = await backend.downloadUpdatePackage()
       setDownloadedUpdate(result)
-      message.success(t('messages.downloadSaved', { path: result.path }))
+      message.success(t('messages.downloadSavedVerified', { path: result.path }))
       return result
     } catch (error) {
       const nextError = error instanceof Error ? error : new Error(t('messages.downloadFailed'))
@@ -1824,7 +1824,9 @@ export default function App() {
             <Typography.Text strong>{t('settings.releaseAsset')}</Typography.Text>
             <Typography.Paragraph type="secondary">
               {updateInfo?.assetName
-                ? t('workspace.matchedPlatformAsset', { name: updateInfo.assetName })
+                ? `${t('workspace.matchedPlatformAsset', { name: updateInfo.assetName })}${
+                    updateInfo.assetSha256 ? ` · SHA256 ${ellipsisMiddle(updateInfo.assetSha256, 24)}` : ''
+                  }`
                 : t('settings.releaseAssetNone')}
             </Typography.Paragraph>
           </div>
@@ -1835,7 +1837,7 @@ export default function App() {
             <Button
               icon={<CloudDownloadOutlined />}
               loading={downloadUpdateLoading}
-              disabled={!updateInfo?.releaseFound || !updateInfo?.hasUpdate || !updateInfo?.hasPlatformAsset}
+              disabled={!updateInfo?.releaseFound || !updateInfo?.hasUpdate || !updateInfo?.hasPlatformAsset || !updateInfo?.assetSha256}
               onClick={() => void handleDownloadUpdatePackage()}
             >
               {t('settings.downloadPackage')}
@@ -1858,6 +1860,16 @@ export default function App() {
               <Typography.Paragraph type="secondary">
                 {downloadedUpdate.assetName} · {formatFileSize(downloadedUpdate.bytes)} · {t('workspace.publishedAt', { time: new Date(downloadedUpdate.downloadedAt).toLocaleString() })}
               </Typography.Paragraph>
+              <div className="settings-row-inline" style={{ marginBottom: 6 }}>
+                <Tag color={downloadedUpdate.verified ? 'success' : 'warning'}>
+                  {downloadedUpdate.verified ? t('settings.sha256Verified') : t('settings.sha256Pending')}
+                </Tag>
+                {downloadedUpdate.verifiedSha256 ? (
+                  <Tooltip title={downloadedUpdate.verifiedSha256}>
+                    <Typography.Text type="secondary">{`SHA256 ${ellipsisMiddle(downloadedUpdate.verifiedSha256, 24)}`}</Typography.Text>
+                  </Tooltip>
+                ) : null}
+              </div>
               <Tooltip title={downloadedUpdate.path}>
                 <Typography.Text type="secondary">{ellipsisMiddle(downloadedUpdate.path)}</Typography.Text>
               </Tooltip>
@@ -1880,6 +1892,8 @@ export default function App() {
               <Typography.Paragraph type="secondary">
                 {updateDownloadProgress.status === 'completed'
                   ? t('workspace.updateDownloadCompleted')
+                  : updateDownloadProgress.status === 'verifying'
+                    ? t('workspace.updateVerifying')
                   : updateDownloadProgress.status === 'error'
                     ? updateDownloadProgress.errorMessage || t('messages.downloadFailed')
                     : updateDownloadProgress.assetName || t('workspace.updateDownloading')}
@@ -1920,6 +1934,11 @@ export default function App() {
               ) : (
                 <Tag color="warning">{t('settings.noPlatformAsset')}</Tag>
               )}
+              {updateInfo.assetSha256 ? (
+                <Tag color="success">{t('settings.sha256Ready')}</Tag>
+              ) : updateInfo.hasPlatformAsset ? (
+                <Tag color="warning">{t('settings.sha256Missing')}</Tag>
+              ) : null}
               {updateInfo.releaseUrl ? (
                 <Button href={updateInfo.releaseUrl} target="_blank">
                   {t('settings.viewRelease')}

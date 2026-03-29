@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"runtime"
 	"strconv"
@@ -40,6 +41,7 @@ type githubReleaseAsset struct {
 	Name               string `json:"name"`
 	BrowserDownloadURL string `json:"browser_download_url"`
 	ContentType        string `json:"content_type"`
+	Size               int64  `json:"size"`
 }
 
 type releaseManifest struct {
@@ -127,8 +129,10 @@ func (c *Checker) Check(ctx context.Context) (domain.UpdateInfo, error) {
 			info.HasPlatformAsset = true
 			info.AssetName = asset.Name
 			info.DownloadURL = asset.BrowserDownloadURL
+			info.AssetSize = asset.Size
 		}
 	}
+	c.enrichSelectedAsset(ctx, release, &info)
 
 	info.HasUpdate = compareVersions(info.LatestVersion, info.CurrentVersion) > 0
 	return info, nil
@@ -232,6 +236,119 @@ func applyReleaseManifest(info *domain.UpdateInfo, manifest releaseManifest) {
 	info.HasPlatformAsset = true
 	info.AssetName = strings.TrimSpace(asset.Name)
 	info.DownloadURL = strings.TrimSpace(asset.DownloadURL)
+	info.AssetSHA256 = normalizeSHA256Digest(asset.SHA256)
+	info.AssetSize = asset.Size
+}
+
+func (c *Checker) enrichSelectedAsset(ctx context.Context, release githubRelease, info *domain.UpdateInfo) {
+	if info == nil || !info.HasPlatformAsset {
+		return
+	}
+
+	if info.AssetSize <= 0 {
+		if asset := findReleaseAssetByName(release.Assets, info.AssetName); asset != nil {
+			info.AssetSize = asset.Size
+		}
+	}
+
+	if info.AssetSHA256 != "" {
+		return
+	}
+
+	checksum, ok := c.loadAssetSHA256(ctx, release.Assets, info.AssetName)
+	if ok {
+		info.AssetSHA256 = checksum
+	}
+}
+
+func findReleaseAssetByName(assets []githubReleaseAsset, assetName string) *githubReleaseAsset {
+	needle := strings.ToLower(strings.TrimSpace(assetName))
+	if needle == "" {
+		return nil
+	}
+
+	for index := range assets {
+		asset := &assets[index]
+		if strings.EqualFold(strings.TrimSpace(asset.Name), needle) {
+			return asset
+		}
+	}
+
+	return nil
+}
+
+func (c *Checker) loadAssetSHA256(ctx context.Context, assets []githubReleaseAsset, assetName string) (string, bool) {
+	for _, candidateName := range checksumLookupCandidates(assetName) {
+		if checksumAsset := findReleaseAssetByName(assets, candidateName); checksumAsset != nil {
+			if digest, ok := c.fetchReleaseChecksum(ctx, *checksumAsset, assetName); ok {
+				return digest, true
+			}
+		}
+	}
+
+	if combinedAsset := findReleaseAssetByName(assets, combinedChecksumAsset); combinedAsset != nil {
+		if digest, ok := c.fetchReleaseChecksum(ctx, *combinedAsset, assetName); ok {
+			return digest, true
+		}
+	}
+
+	return "", false
+}
+
+func (c *Checker) fetchReleaseChecksum(ctx context.Context, asset githubReleaseAsset, assetName string) (string, bool) {
+	candidates := []struct {
+		url    string
+		accept string
+	}{
+		{url: strings.TrimSpace(asset.APIURL), accept: "application/octet-stream"},
+		{url: strings.TrimSpace(asset.BrowserDownloadURL), accept: "text/plain"},
+	}
+
+	for _, candidate := range candidates {
+		if candidate.url == "" {
+			continue
+		}
+
+		content, ok := c.fetchReleaseTextAsset(ctx, candidate.url, candidate.accept)
+		if !ok {
+			continue
+		}
+
+		if digest := parseSHA256Digest(content, assetName); digest != "" {
+			return digest, true
+		}
+	}
+
+	return "", false
+}
+
+func (c *Checker) fetchReleaseTextAsset(ctx context.Context, sourceURL string, accept string) (string, bool) {
+	request, err := http.NewRequestWithContext(ctx, http.MethodGet, sourceURL, nil)
+	if err != nil {
+		return "", false
+	}
+	if strings.TrimSpace(accept) != "" {
+		request.Header.Set("Accept", accept)
+	}
+	request.Header.Set("User-Agent", "NatsX-UpdateChecker")
+	request.Header.Set("X-GitHub-Api-Version", "2022-11-28")
+
+	response, err := c.client.Do(request)
+	if err != nil {
+		return "", false
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode != http.StatusOK {
+		return "", false
+	}
+
+	body, err := io.ReadAll(response.Body)
+	if err != nil {
+		return "", false
+	}
+
+	return string(body), true
 }
 
 func pickBestManifestAsset(assets []releaseManifestAsset, platform string) *releaseManifestAsset {

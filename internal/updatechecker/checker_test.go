@@ -1,6 +1,10 @@
 package updatechecker
 
-import "testing"
+import (
+	"testing"
+
+	"natsx/internal/domain"
+)
 
 func TestCompareVersions(t *testing.T) {
 	testCases := []struct {
@@ -72,8 +76,8 @@ func TestPickReleaseManifestAsset(t *testing.T) {
 
 func TestPickBestManifestAsset(t *testing.T) {
 	assets := []releaseManifestAsset{
-		{Platform: "windows-amd64", Name: "NatsX-1.0.2-windows-amd64.zip", Kind: "archive", DownloadURL: "zip"},
-		{Platform: "windows-amd64", Name: "NatsX-1.0.2-windows-amd64-setup.exe", Kind: "installer", DownloadURL: "setup"},
+		{Platform: "windows-amd64", Name: "NatsX-1.0.2-windows-amd64.zip", Kind: "archive", DownloadURL: "zip", SHA256: "zipsha", Size: 1024},
+		{Platform: "windows-amd64", Name: "NatsX-1.0.2-windows-amd64-setup.exe", Kind: "installer", DownloadURL: "setup", SHA256: "setupsha", Size: 2048},
 		{Platform: "linux-amd64", Name: "NatsX-1.0.2-linux-amd64.tar.gz", Kind: "archive", DownloadURL: "linux"},
 	}
 
@@ -83,5 +87,31 @@ func TestPickBestManifestAsset(t *testing.T) {
 	}
 	if selected.DownloadURL != "setup" {
 		t.Fatalf("expected installer manifest asset, got %q", selected.DownloadURL)
+	}
+}
+
+func TestApplyReleaseManifestCopiesChecksumMetadata(t *testing.T) {
+	info := &domain.UpdateInfo{Platform: "windows-amd64"}
+	manifest := releaseManifest{
+		Version: "1.0.3",
+		Assets: []releaseManifestAsset{
+			{
+				Platform:    "windows-amd64",
+				Name:        "NatsX-1.0.3-windows-amd64.zip",
+				Kind:        "archive",
+				DownloadURL: "https://example.com/NatsX-1.0.3-windows-amd64.zip",
+				SHA256:      "1B83B14CC34E3F701F64774CCFE44FEEE200C2F4356ABF2285650DF8704992B9",
+				Size:        7131033,
+			},
+		},
+	}
+
+	applyReleaseManifest(info, manifest)
+
+	if info.AssetSHA256 != "1b83b14cc34e3f701f64774ccfe44feee200c2f4356abf2285650df8704992b9" {
+		t.Fatalf("unexpected asset sha256: %q", info.AssetSHA256)
+	}
+	if info.AssetSize != 7131033 {
+		t.Fatalf("unexpected asset size: %d", info.AssetSize)
 	}
 }

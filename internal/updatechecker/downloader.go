@@ -2,11 +2,14 @@ package updatechecker
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -114,4 +117,41 @@ func maxInt64(left, right int64) int64 {
 		return left
 	}
 	return right
+}
+
+func CalculateSHA256(path string) (string, error) {
+	trimmed := strings.TrimSpace(path)
+	if trimmed == "" {
+		return "", fmt.Errorf("path is empty")
+	}
+
+	file, err := os.Open(trimmed)
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
+
+	hasher := sha256.New()
+	if _, err := io.Copy(hasher, file); err != nil {
+		return "", err
+	}
+
+	return hex.EncodeToString(hasher.Sum(nil)), nil
+}
+
+func VerifySHA256(path string, expected string) (string, error) {
+	normalizedExpected := normalizeSHA256Digest(expected)
+	if normalizedExpected == "" {
+		return "", fmt.Errorf("expected sha256 is empty")
+	}
+
+	actual, err := CalculateSHA256(path)
+	if err != nil {
+		return "", err
+	}
+	if actual != normalizedExpected {
+		return actual, fmt.Errorf("sha256 verification failed: expected %s, got %s", normalizedExpected, actual)
+	}
+
+	return actual, nil
 }

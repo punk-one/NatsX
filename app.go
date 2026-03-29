@@ -1,4 +1,4 @@
-﻿package main
+package main
 
 import (
 	"context"
@@ -252,6 +252,7 @@ func (a *App) DownloadUpdatePackage() (domain.UpdateDownloadResult, error) {
 		LatestVersion:   info.LatestVersion,
 		AssetName:       defaultFilename,
 		Path:            savePath,
+		ExpectedSHA256:  info.AssetSHA256,
 		DownloadedBytes: 0,
 		TotalBytes:      0,
 		ProgressPercent: 0,
@@ -263,6 +264,7 @@ func (a *App) DownloadUpdatePackage() (domain.UpdateDownloadResult, error) {
 			LatestVersion:   info.LatestVersion,
 			AssetName:       defaultFilename,
 			Path:            savePath,
+			ExpectedSHA256:  info.AssetSHA256,
 			DownloadedBytes: downloaded,
 			TotalBytes:      total,
 			ProgressPercent: calculateProgressPercent(downloaded, total),
@@ -274,10 +276,57 @@ func (a *App) DownloadUpdatePackage() (domain.UpdateDownloadResult, error) {
 			LatestVersion:   info.LatestVersion,
 			AssetName:       defaultFilename,
 			Path:            savePath,
+			ExpectedSHA256:  info.AssetSHA256,
 			ErrorMessage:    err.Error(),
 			DownloadedBytes: 0,
 			TotalBytes:      0,
 			ProgressPercent: 0,
+		})
+		return domain.UpdateDownloadResult{}, err
+	}
+
+	expectedSHA256 := strings.TrimSpace(info.AssetSHA256)
+	if expectedSHA256 == "" {
+		err := fmt.Errorf("release checksum is unavailable for %s", defaultFilename)
+		_ = os.Remove(savePath)
+		a.emitUpdateDownloadProgress(domain.UpdateDownloadProgress{
+			Status:          "error",
+			LatestVersion:   info.LatestVersion,
+			AssetName:       defaultFilename,
+			Path:            savePath,
+			ErrorMessage:    err.Error(),
+			DownloadedBytes: written,
+			TotalBytes:      written,
+			ProgressPercent: 100,
+		})
+		return domain.UpdateDownloadResult{}, err
+	}
+
+	a.emitUpdateDownloadProgress(domain.UpdateDownloadProgress{
+		Status:          "verifying",
+		LatestVersion:   info.LatestVersion,
+		AssetName:       defaultFilename,
+		Path:            savePath,
+		ExpectedSHA256:  expectedSHA256,
+		DownloadedBytes: written,
+		TotalBytes:      written,
+		ProgressPercent: 100,
+	})
+
+	verifiedSHA256, err := updatechecker.VerifySHA256(savePath, expectedSHA256)
+	if err != nil {
+		_ = os.Remove(savePath)
+		a.emitUpdateDownloadProgress(domain.UpdateDownloadProgress{
+			Status:          "error",
+			LatestVersion:   info.LatestVersion,
+			AssetName:       defaultFilename,
+			Path:            savePath,
+			ExpectedSHA256:  expectedSHA256,
+			VerifiedSHA256:  verifiedSHA256,
+			ErrorMessage:    err.Error(),
+			DownloadedBytes: written,
+			TotalBytes:      written,
+			ProgressPercent: 100,
 		})
 		return domain.UpdateDownloadResult{}, err
 	}
@@ -287,19 +336,24 @@ func (a *App) DownloadUpdatePackage() (domain.UpdateDownloadResult, error) {
 		LatestVersion:   info.LatestVersion,
 		AssetName:       defaultFilename,
 		Path:            savePath,
+		ExpectedSHA256:  expectedSHA256,
+		VerifiedSHA256:  verifiedSHA256,
 		DownloadedBytes: written,
 		TotalBytes:      written,
 		ProgressPercent: 100,
 	})
 
 	result := domain.UpdateDownloadResult{
-		Path:          savePath,
-		AssetName:     defaultFilename,
-		LatestVersion: info.LatestVersion,
-		ReleaseURL:    info.ReleaseURL,
-		DownloadURL:   info.DownloadURL,
-		Bytes:         written,
-		DownloadedAt:  time.Now(),
+		Path:           savePath,
+		AssetName:      defaultFilename,
+		LatestVersion:  info.LatestVersion,
+		ReleaseURL:     info.ReleaseURL,
+		DownloadURL:    info.DownloadURL,
+		ExpectedSHA256: expectedSHA256,
+		VerifiedSHA256: verifiedSHA256,
+		Verified:       true,
+		Bytes:          written,
+		DownloadedAt:   time.Now(),
 	}
 	if a.dbStore != nil {
 		if err := a.dbStore.SaveUpdateState(domain.UpdateState{DownloadedPackage: &result}); err != nil {
@@ -584,4 +638,3 @@ func defaultExportFilename(masked bool) string {
 	}
 	return fmt.Sprintf("%s-%s.json", name, timestamp)
 }
-
